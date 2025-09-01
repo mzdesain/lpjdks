@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Keuangan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <!-- Login Screen -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center px-4">
+        <div class="bg-white rounded-xl shadow-lg p-6 sm:p-8 w-full max-w-md border border-gray-200">
+            <div class="text-center mb-6">
+                <div class="text-4xl mb-4">🔐</div>
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">Login LPJ DKS</h1>
+                <p class="text-gray-600">Masukkan password untuk mengakses</p>
+            </div>
+            <div class="space-y-4">
+                <input type="password" id="passwordInput" placeholder="Masukkan password" 
+                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                       onkeypress="if(event.key==='Enter') login()">
+                <button onclick="login()" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-4 rounded-lg transition duration-200">
+                    Masuk
+                </button>
+                <div id="loginError" class="text-red-600 text-sm text-center hidden">Password salah! Coba lagi.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <div class="container mx-auto px-4 py-8 max-w-6xl">
+            <!-- Header -->
+            <div class="text-center mb-6 sm:mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <div></div>
+                    <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-800">LPJ DKS</h1>
+                    <button onclick="logout()" class="text-red-600 hover:text-red-800 text-sm font-medium">
+                        🚪 Keluar
+                    </button>
+                </div>
+                <p class="text-sm sm:text-base text-gray-600 px-4">SMP-SMAS Tahfidz Al-Quran Wadah Islamiyah Anabanua</p>
+            </div>
+
+            <!-- Total Saldo Card -->
+            <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 border border-gray-200">
+                <div class="text-center">
+                    <h2 class="text-lg sm:text-xl font-semibold text-gray-700 mb-2">Total Saldo</h2>
+                    <div id="totalSaldo" class="text-2xl sm:text-3xl lg:text-4xl font-bold text-green-600">Rp 0</div>
+                </div>
+            </div>
+
+            <!-- Input Form -->
+            <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-8 border border-gray-200">
+                <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">Tambah Transaksi</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                    <!-- Pemasukan Form -->
+                    <div class="space-y-3 sm:space-y-4">
+                        <h4 class="font-medium text-green-600 flex items-center text-sm sm:text-base">
+                            <span class="mr-2">📈</span> Pemasukan
+                        </h4>
+                        <input type="number" id="pemasukanAmount" placeholder="Jumlah pemasukan" 
+                               class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <input type="text" id="pemasukanDesc" placeholder="Keterangan pemasukan" 
+                               class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                        <button onclick="tambahPemasukan()" 
+                                class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 sm:py-3 px-4 rounded-lg transition duration-200 text-sm sm:text-base">
+                            Tambah Pemasukan
+                        </button>
+                    </div>
+
+                    <!-- Pengeluaran Form -->
+                    <div class="space-y-3 sm:space-y-4">
+                        <h4 class="font-medium text-red-600 flex items-center text-sm sm:text-base">
+                            <span class="mr-2">📉</span> Pengeluaran
+                        </h4>
+                        <input type="number" id="pengeluaranAmount" placeholder="Jumlah pengeluaran" 
+                               class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        <input type="text" id="pengeluaranDesc" placeholder="Rincian pengeluaran" 
+                               class="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        <button onclick="tambahPengeluaran()" 
+                                class="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 sm:py-3 px-4 rounded-lg transition duration-200 text-sm sm:text-base">
+                            Tambah Pengeluaran
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabel Transaksi -->
+            <div class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+                <div class="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                    <h3 class="text-lg sm:text-xl font-semibold text-gray-800">Riwayat Transaksi</h3>
+                    <div class="text-sm text-gray-600">
+                        Total: <span id="totalTransaksi">0</span> transaksi
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-700">No</th>
+                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-700">Pemasukan</th>
+                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-700 hidden sm:table-cell">Pengeluaran</th>
+                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-700 sm:hidden">Transaksi</th>
+                                <th class="px-3 sm:px-6 py-3 sm:py-4 text-left text-xs sm:text-sm font-semibold text-gray-700">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transaksiTable" class="divide-y divide-gray-200">
+                            <!-- Data akan ditambahkan di sini -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div id="pagination" class="px-4 sm:px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
+                    <div class="text-sm text-gray-600">
+                        Halaman <span id="currentPage">1</span> dari <span id="totalPages">1</span>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button id="prevBtn" onclick="changePage(-1)" 
+                                class="px-3 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition duration-150 text-sm disabled:opacity-50">
+                            ← Sebelumnya
+                        </button>
+                        <button id="nextBtn" onclick="changePage(1)" 
+                                class="px-3 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition duration-150 text-sm disabled:opacity-50">
+                            Selanjutnya →
+                        </button>
+                    </div>
+                </div>
+
+                <div id="emptyState" class="text-center py-8 sm:py-12 text-gray-500 px-4 hidden">
+                    <div class="text-4xl sm:text-6xl mb-4">📊</div>
+                    <p class="text-base sm:text-lg">Belum ada transaksi</p>
+                    <p class="text-xs sm:text-sm">Mulai tambahkan pemasukan atau pengeluaran Anda</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CORRECT_PASSWORD = 'Wahdah123';
+        const ITEMS_PER_PAGE = 15;
+        let transaksi = [];
+        let nomorUrut = 1;
+        let currentPage = 1;
+
+        // Load data dari localStorage saat halaman dimuat
+        function loadData() {
+            const savedData = localStorage.getItem('keuanganData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                transaksi = data.transaksi || [];
+                nomorUrut = data.nomorUrut || 1;
+            }
+        }
+
+        // Simpan data ke localStorage
+        function saveData() {
+            const data = {
+                transaksi: transaksi,
+                nomorUrut: nomorUrut
+            };
+            localStorage.setItem('keuanganData', JSON.stringify(data));
+        }
+
+        // Login function
+        function login() {
+            const password = document.getElementById('passwordInput').value;
+            const errorDiv = document.getElementById('loginError');
+            
+            if (password === CORRECT_PASSWORD) {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                loadData();
+                updateTable();
+                hitungTotalSaldo();
+            } else {
+                errorDiv.classList.remove('hidden');
+                document.getElementById('passwordInput').value = '';
+                setTimeout(() => {
+                    errorDiv.classList.add('hidden');
+                }, 3000);
+            }
+        }
+
+        // Logout function
+        function logout() {
+            if (confirm('Yakin ingin keluar?')) {
+                document.getElementById('mainApp').classList.add('hidden');
+                document.getElementById('loginScreen').classList.remove('hidden');
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        function formatRupiah(angka) {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0
+            }).format(angka);
+        }
+
+        function hitungTotalSaldo() {
+            let total = 0;
+            transaksi.forEach(item => {
+                if (item.type === 'pemasukan') {
+                    total += item.amount;
+                } else {
+                    total -= item.amount;
+                }
+            });
+            
+            const saldoElement = document.getElementById('totalSaldo');
+            saldoElement.textContent = formatRupiah(total);
+            saldoElement.className = total >= 0 ? 'text-2xl sm:text-3xl lg:text-4xl font-bold text-green-600' : 'text-2xl sm:text-3xl lg:text-4xl font-bold text-red-600';
+        }
+
+        function tambahPemasukan() {
+            const amount = parseFloat(document.getElementById('pemasukanAmount').value);
+            const desc = document.getElementById('pemasukanDesc').value.trim();
+
+            if (!amount || amount <= 0) {
+                alert('Masukkan jumlah pemasukan yang valid!');
+                return;
+            }
+
+            if (!desc) {
+                alert('Masukkan keterangan pemasukan!');
+                return;
+            }
+
+            transaksi.push({
+                id: Date.now(),
+                nomor: nomorUrut++,
+                type: 'pemasukan',
+                amount: amount,
+                description: desc,
+                date: new Date().toLocaleDateString('id-ID')
+            });
+
+            document.getElementById('pemasukanAmount').value = '';
+            document.getElementById('pemasukanDesc').value = '';
+            
+            saveData();
+            // Pindah ke halaman terakhir untuk melihat transaksi terbaru
+            const totalPages = Math.ceil(transaksi.length / ITEMS_PER_PAGE);
+            currentPage = totalPages;
+            updateTable();
+            hitungTotalSaldo();
+        }
+
+        function tambahPengeluaran() {
+            const amount = parseFloat(document.getElementById('pengeluaranAmount').value);
+            const desc = document.getElementById('pengeluaranDesc').value.trim();
+
+            if (!amount || amount <= 0) {
+                alert('Masukkan jumlah pengeluaran yang valid!');
+                return;
+            }
+
+            if (!desc) {
+                alert('Masukkan rincian pengeluaran!');
+                return;
+            }
+
+            transaksi.push({
+                id: Date.now(),
+                nomor: nomorUrut++,
+                type: 'pengeluaran',
+                amount: amount,
+                description: desc,
+                date: new Date().toLocaleDateString('id-ID')
+            });
+
+            document.getElementById('pengeluaranAmount').value = '';
+            document.getElementById('pengeluaranDesc').value = '';
+            
+            saveData();
+            // Pindah ke halaman terakhir untuk melihat transaksi terbaru
+            const totalPages = Math.ceil(transaksi.length / ITEMS_PER_PAGE);
+            currentPage = totalPages;
+            updateTable();
+            hitungTotalSaldo();
+        }
+
+        function hapusTransaksi(id) {
+            if (confirm('Yakin ingin menghapus transaksi ini?')) {
+                transaksi = transaksi.filter(item => item.id != id);
+                saveData();
+                
+                // Adjust current page if needed
+                const totalPages = Math.ceil(transaksi.length / ITEMS_PER_PAGE);
+                if (currentPage > totalPages && totalPages > 0) {
+                    currentPage = totalPages;
+                }
+                
+                updateTable();
+                hitungTotalSaldo();
+            }
+        }
+
+        function changePage(direction) {
+            const totalPages = Math.ceil(transaksi.length / ITEMS_PER_PAGE);
+            const newPage = currentPage + direction;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                updateTable();
+            }
+        }
+
+        function updateTable() {
+            const tableBody = document.getElementById('transaksiTable');
+            const emptyState = document.getElementById('emptyState');
+            const pagination = document.getElementById('pagination');
+            
+            // Update total transaksi
+            document.getElementById('totalTransaksi').textContent = transaksi.length;
+            
+            if (transaksi.length === 0) {
+                tableBody.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                pagination.classList.add('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            pagination.classList.remove('hidden');
+            
+            // Calculate pagination
+            const totalPages = Math.ceil(transaksi.length / ITEMS_PER_PAGE);
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const currentItems = transaksi.slice(startIndex, endIndex);
+            
+            // Update pagination info
+            document.getElementById('currentPage').textContent = currentPage;
+            document.getElementById('totalPages').textContent = totalPages;
+            
+            // Update pagination buttons
+            document.getElementById('prevBtn').disabled = currentPage === 1;
+            document.getElementById('nextBtn').disabled = currentPage === totalPages;
+            
+            tableBody.innerHTML = currentItems.map((item, index) => {
+                const displayNumber = startIndex + index + 1;
+                return `
+                <tr class="hover:bg-gray-50 transition duration-150">
+                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm text-gray-900">${displayNumber}</td>
+                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm">
+                        ${item.type === 'pemasukan' ? 
+                            `<div class="text-green-600 font-medium">+${formatRupiah(item.amount)}</div>
+                             <div class="text-gray-500 text-xs">${item.description}</div>
+                             <div class="text-gray-400 text-xs">${item.date}</div>` : 
+                            '<span class="text-gray-400">-</span>'
+                        }
+                    </td>
+                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm hidden sm:table-cell">
+                        ${item.type === 'pengeluaran' ? 
+                            `<div class="text-red-600 font-medium">-${formatRupiah(item.amount)}</div>
+                             <div class="text-gray-500 text-xs">${item.description}</div>
+                             <div class="text-gray-400 text-xs">${item.date}</div>` : 
+                            '<span class="text-gray-400">-</span>'
+                        }
+                    </td>
+                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm sm:hidden">
+                        ${item.type === 'pengeluaran' ? 
+                            `<div class="text-red-600 font-medium">-${formatRupiah(item.amount)}</div>
+                             <div class="text-gray-500 text-xs">${item.description}</div>
+                             <div class="text-gray-400 text-xs">${item.date}</div>` : 
+                            item.type === 'pemasukan' ?
+                            `<div class="text-green-600 font-medium">+${formatRupiah(item.amount)}</div>
+                             <div class="text-gray-500 text-xs">${item.description}</div>
+                             <div class="text-gray-400 text-xs">${item.date}</div>` : ''
+                        }
+                    </td>
+                    <td class="px-3 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm">
+                        <button onclick="hapusTransaksi('${item.id}')" 
+                                class="text-red-600 hover:text-red-800 font-medium transition duration-150 text-xs sm:text-sm">
+                            🗑️ <span class="hidden sm:inline">Hapus</span>
+                        </button>
+                    </td>
+                </tr>
+            `;
+            }).join('');
+        }
+
+        // Inisialisasi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cek apakah sudah login sebelumnya (opsional)
+            updateTable();
+            hitungTotalSaldo();
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'978540fbd5bbf8d2',t:'MTc1NjczNDgwNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
