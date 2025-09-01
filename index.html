@@ -134,16 +134,16 @@
                 
                 <div id="pagination" class="px-4 sm:px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-between items-center">
                     <div class="text-sm text-gray-600">
-                        Halaman <span id="currentPage">1</span> dari <span id="totalPages">1</span>
+                        Hal <span id="currentPage">1</span> dari <span id="totalPages">1</span>
                     </div>
                     <div class="flex space-x-2">
                         <button id="prevBtn" onclick="window.changePage(-1)"
                                 class="px-3 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition duration-150 text-sm disabled:opacity-50">
-                            ← Sebelumnya
+                            ← Back
                         </button>
                         <button id="nextBtn" onclick="window.changePage(1)"
                                 class="px-3 py-1 bg-gray-200 text-gray-600 rounded hover:bg-gray-300 transition duration-150 text-sm disabled:opacity-50">
-                            Selanjutnya →
+                            Next →
                         </button>
                     </div>
                 </div>
@@ -198,7 +198,7 @@
         const auth = getAuth(app);
         
         const CORRECT_PASSWORD = 'Wahdah123';
-        const ITEMS_PER_PAGE = 15;
+        const ITEMS_PER_PAGE = 10;
         let transaksi = [];
         let currentPage = 1;
         let unsubscribe; 
